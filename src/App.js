@@ -10,7 +10,7 @@ import iconUrl from 'leaflet/dist/images/marker-icon.png';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
 
-// Fixing Leaflet marker icons issue
+
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -59,7 +59,7 @@ L.Marker.prototype.options.icon = defaultIcon;
 
 return (
   <div className="App">
-    <h1>IP Tracker</h1>
+    <h1>What is my IP</h1>
     {ipInfo && (
       <div>
         <h2>Your IP Address: {ipInfo.ip}</h2>
