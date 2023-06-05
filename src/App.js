@@ -21,26 +21,37 @@ function App() {
   const [countryInfo, setCountryInfo] = useState(null);
 
   useEffect(() => {
-    fetch('https://api.ipify.org?format=json')
-      .then((response) => response.json())
-      .then((data) => {
-        const ipAddress = data.ip;
-        fetch(`https://ipapi.co/${ipAddress}/json/`)
-          .then((response) => response.json())
-          .then((data) => setIpInfo(data))
-          .catch((error) => console.log(error));
-      })
-      .catch((error) => console.log(error));
+    const fetchIpAddress = async () => {
+      try {
+        const response = await axios.get('https://geo.ipify.org/api/v1?apiKey=at_HqExWTn4CzGONOuj9XE95sNlocYNu');
+        const ipAddress = response.data.ip;
+        fetchIpInfo(ipAddress);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchIpAddress();
   }, []);
 
-  useEffect(() => {
-    if (ipInfo && ipInfo.country_name) {
-      axios
-        .get(`https://restcountries.com/v3.1/name/${ipInfo.country_name}`)
-        .then((response) => setCountryInfo(response.data[0]))
-        .catch((error) => console.log(error));
+  const fetchIpInfo = async (ipAddress) => {
+    try {
+      const response = await axios.get(`https://ipapi.co/${ipAddress}/json/`);
+      setIpInfo(response.data);
+      fetchCountryInfo(response.data.country_name);
+    } catch (error) {
+      console.log(error);
     }
-  }, [ipInfo]);
+  };
+
+  const fetchCountryInfo = async (countryName) => {
+    try {
+      const response = await axios.get(`https://restcountries.com/v3.1/name/${countryName}`);
+      setCountryInfo(response.data[0]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const defaultIcon = L.icon({
     iconUrl: iconUrl,
@@ -77,13 +88,14 @@ function App() {
               <div>
                 <h4>Your Local Time</h4>
                 <p>Date and Time: {DateTime.now().toLocaleString(DateTime.DATETIME_FULL)}</p>
-                {ipInfo.timezone && (
-                  <>
-                    <h4>Time in {ipInfo.timezone}</h4>
-                    <p>Date and Time: {DateTime.now().setZone(ipInfo.timezone).toLocaleString(DateTime.DATETIME_FULL)}</p>
-                  </>
-                )}
+                <p>Timezone: {DateTime.now().zoneName}</p>
               </div>
+              {ipInfo.timezone && (
+                <div>
+                  <h4>Time in {ipInfo.timezone}</h4>
+                  <p>Date and Time: {DateTime.now().setZone(ipInfo.timezone).toLocaleString(DateTime.DATETIME_FULL)}</p>
+                </div>
+              )}
             </Popup>
           </Marker>
         </MapContainer>
